@@ -1,0 +1,38 @@
+{
+  "url": "http://127.0.0.1:8081/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Roshoi Rider",
+      "hasCanvas": false,
+      "bodyTextLen": 322,
+      "bodyTextHash": "34f6a6e4ade38c7f41280a957d3119818989c8196b5fd525a49184dafcb4f4bf",
+      "bodyTextPrefix": "SIMULATED বাংলা ROSHOI Roshoi Partner Sign in to go on duty. Sim",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-built.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Roshoi Rider",
+      "hasCanvas": false,
+      "bodyTextLen": 322,
+      "bodyTextHash": "34f6a6e4ade38c7f41280a957d3119818989c8196b5fd525a49184dafcb4f4bf",
+      "bodyTextPrefix": "SIMULATED বাংলা ROSHOI Roshoi Partner Sign in to go on duty. Sim",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-built-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-built.json",
+  "divergesFromBaseline": false,
+  "baselineReasons": []
+}

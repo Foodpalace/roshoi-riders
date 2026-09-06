@@ -1,0 +1,1 @@
+import{r as e}from"./useRouter-Dp_HiUG-.js";import{n as t}from"./index-BS1nQoLF.js";var n=e(),r=()=>(0,n.jsx)(t,{to:`/earnings`});export{r as component};

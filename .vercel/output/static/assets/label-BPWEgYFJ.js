@@ -1,0 +1,1 @@
+import{r as e}from"./useRouter-Dp_HiUG-.js";import{r as t}from"./button-BYZCuUDO.js";var n=e();function r({className:e,...r}){return(0,n.jsx)(`label`,{className:t(`text-sm font-medium text-fg`,e),...r})}export{r as t};
