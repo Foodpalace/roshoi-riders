@@ -22,8 +22,12 @@ function mapDeliveryAction(state: DeliveryState, action: string, reason?: string
   if (action === "ARRIVE_CUSTOMER") return { from: "ON_THE_WAY", to: "ARRIVING" };
   if (action === "DELIVER") return { from: "ARRIVING", to: "DELIVERED" };
   if (action === "UNAVAILABLE") return { from: "ARRIVING", to: "CUSTOMER_UNAVAILABLE", reason };
-  if (action === "CANCEL") return { from: "RIDER_ASSIGNED", to: "RIDER_CANCELLED", reason };
-  if (action === "CANCEL_AFTER_PICKUP") return { from: state === "ON_THE_WAY" ? "ON_THE_WAY" : "PICKED_UP", to: "RIDER_CANCELLED", reason };
+  if (action === "CANCEL") {
+    if (state === "ON_THE_WAY") return { from: "ON_THE_WAY", to: "RIDER_CANCELLED", reason };
+    if (state === "PICKED_UP") return { from: "PICKED_UP", to: "RIDER_CANCELLED", reason };
+    if (state === "ARRIVED_AT_CUSTOMER") return { from: "ARRIVING", to: "RIDER_CANCELLED", reason };
+    return { from: "RIDER_ASSIGNED", to: "RIDER_CANCELLED", reason };
+  }
   return null;
 }
 
@@ -51,5 +55,27 @@ export async function transitionLiveOrder(input: {
   });
   const payload = (await response.json().catch(() => ({}))) as { data?: unknown; error?: string };
   if (!response.ok || !payload.data) throw new Error(payload.error ?? `HDmaster rider transition failed (${response.status})`);
+  return payload.data;
+}
+
+export async function ensureLiveRiderAssigned(input: {
+  orderId: string;
+  riderId: string;
+  idempotencyKey: string;
+}) {
+  const { url, token } = config();
+  const correlationId = `rider:${input.riderId}:${input.orderId}:assign`;
+  const response = await fetch(`${url}/v1/admin/orders/${encodeURIComponent(input.orderId)}/rider-transition`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      authorization: `Bearer ${token}`,
+      "Idempotency-Key": input.idempotencyKey,
+      "X-Correlation-Id": correlationId,
+    },
+    body: JSON.stringify({ contractVersion: "1", riderId: input.riderId, from: "READY", to: "RIDER_ASSIGNED", correlationId }),
+  });
+  const payload = (await response.json().catch(() => ({}))) as { data?: unknown; error?: string };
+  if (!response.ok || !payload.data) throw new Error(payload.error ?? `HDmaster rider assignment failed (${response.status})`);
   return payload.data;
 }
