@@ -3,6 +3,7 @@ import { authMiddleware } from "@/lib/auth/middleware";
 import { getSql } from "@/lib/db";
 import { RiderEngine, rangePreset } from "@/lib/rider/engine";
 import { PgStore } from "@/lib/rider/pg-store";
+import { ensureLiveRiderAssigned, transitionLiveOrder } from "./hdmaster-order-transition";
 import {
   RiderError,
   type AvailabilityStatus,
@@ -141,6 +142,25 @@ export const deliveryActionFn = createServerFn({ method: "POST" })
       const e = await engine();
       const id = data.deliveryId;
       const key = data.idempotencyKey;
+
+      const liveSyncAction = ["PICKUP", "START", "ARRIVE_CUSTOMER", "DELIVER", "UNAVAILABLE", "CANCEL"].includes(data.action);
+      if (liveSyncAction) {
+        const current = await e.getDelivery(context.userId, id);
+        if (current.dataMode === "LIVE") {
+          if (data.action === "PICKUP" && ["OFFERED", "ACCEPTED", "ARRIVING_AT_RESTAURANT", "ARRIVED_AT_RESTAURANT"].includes(current.state)) {
+            await ensureLiveRiderAssigned({ orderId: current.orderId, riderId: current.riderId, idempotencyKey: `${key}:assign` });
+          }
+          await transitionLiveOrder({
+            orderId: current.orderId,
+            riderId: current.riderId,
+            deliveryState: current.state,
+            action: data.action,
+            idempotencyKey: key,
+            reason: data.reason,
+          });
+        }
+      }
+
       switch (data.action) {
         case "ARRIVING":
           return { delivery: await e.arriving(context.userId, id, key) };
