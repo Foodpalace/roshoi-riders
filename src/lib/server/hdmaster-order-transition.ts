@@ -34,6 +34,7 @@ function mapDeliveryAction(state: DeliveryState, action: string, reason?: string
 export async function transitionLiveOrder(input: {
   orderId: string;
   riderId: string;
+  riderUserId: string;
   deliveryState: DeliveryState;
   action: string;
   idempotencyKey: string;
@@ -50,6 +51,7 @@ export async function transitionLiveOrder(input: {
       authorization: `Bearer ${token}`,
       "Idempotency-Key": input.idempotencyKey,
       "X-Correlation-Id": correlationId,
+      "X-Order-King-Rider-User-Id": input.riderUserId,
     },
     body: JSON.stringify({ contractVersion: "1", riderId: input.riderId, from: transition.from, to: transition.to, reason: transition.reason, correlationId }),
   });
@@ -61,6 +63,7 @@ export async function transitionLiveOrder(input: {
 export async function ensureLiveRiderAssigned(input: {
   orderId: string;
   riderId: string;
+  riderUserId: string;
   idempotencyKey: string;
 }) {
   const { url, token } = config();
@@ -72,6 +75,7 @@ export async function ensureLiveRiderAssigned(input: {
       authorization: `Bearer ${token}`,
       "Idempotency-Key": input.idempotencyKey,
       "X-Correlation-Id": correlationId,
+      "X-Order-King-Rider-User-Id": input.riderUserId,
     },
     body: JSON.stringify({ contractVersion: "1", riderId: input.riderId, from: "READY", to: "RIDER_ASSIGNED", correlationId }),
   });
