@@ -148,11 +148,12 @@ export const deliveryActionFn = createServerFn({ method: "POST" })
         const current = await e.getDelivery(context.userId, id);
         if (current.dataMode === "LIVE") {
           if (data.action === "PICKUP" && ["OFFERED", "ACCEPTED", "ARRIVING_AT_RESTAURANT", "ARRIVED_AT_RESTAURANT"].includes(current.state)) {
-            await ensureLiveRiderAssigned({ orderId: current.orderId, riderId: current.riderId, idempotencyKey: `${key}:assign` });
+            await ensureLiveRiderAssigned({ orderId: current.orderId, riderId: current.riderId, riderUserId: context.userId, idempotencyKey: `${key}:assign` });
           }
           await transitionLiveOrder({
             orderId: current.orderId,
             riderId: current.riderId,
+            riderUserId: context.userId,
             deliveryState: current.state,
             action: data.action,
             idempotencyKey: key,
